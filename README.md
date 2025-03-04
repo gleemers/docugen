@@ -2,6 +2,15 @@
 
 Generate documentation based on a README.md file!
 
+## Usage
+```sh
+gleam run -- <md file>
+```
+
+```sh
+docugen <md file>
+```
+
 ## Development
 
 ```sh
