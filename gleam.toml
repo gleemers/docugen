@@ -1,6 +1,8 @@
 name = "docugen"
 version = "1.0.0"
 target = "erlang"
+license = "MIT"
+description = "A tool for generating HTML documentation from Markdown files."
 
 [dependencies]
 gleam_stdlib = ">= 0.44.0 and < 2.0.0"

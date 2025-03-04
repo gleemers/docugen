@@ -49,15 +49,15 @@ pub fn convert_line(line: String) -> String {
     "```" <> lang -> {
       case string.trim(lang) {
         "" -> "<div class=\"code-block\">"
+        "gleam" -> "<div class=\"code-block language-gleam\">"
+        "erl" | "erlang" -> "<div class=\"code-block language-erlang\">"
+        "ex" | "exs" | "elixir" -> "<div class=\"code-block language-elixir\">"
         "js" | "javascript" -> "<div class=\"code-block language-javascript\">"
         "ts" | "typescript" -> "<div class=\"code-block language-typescript\">"
         "py" | "python" -> "<div class=\"code-block language-python\">"
         "rb" | "ruby" -> "<div class=\"code-block language-ruby\">"
         "go" -> "<div class=\"code-block language-go\">"
         "rs" | "rust" -> "<div class=\"code-block language-rust\">"
-        "gleam" -> "<div class=\"code-block language-gleam\">"
-        "erlang" -> "<div class=\"code-block language-erlang\">"
-        "elixir" -> "<div class=\"code-block language-elixir\">"
         "java" -> "<div class=\"code-block language-java\">"
         "c" | "cpp" | "c++" -> "<div class=\"code-block language-cpp\">"
         "cs" | "csharp" -> "<div class=\"code-block language-csharp\">"
