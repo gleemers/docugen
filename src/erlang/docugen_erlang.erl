@@ -40,4 +40,4 @@ get_argv() ->
 
 % Print usage information
 print_usage() ->
-    io:format("Usage: docugen <filename.md>~n").
+    io:format("Usage: docugen <input_filename.md> [output_filename.html]~n").

@@ -17,14 +17,22 @@ pub fn main() {
       Nil
     }
     _ -> {
-      // Process the file
-      let filename_raw = string.split(argv, " ") |> list.first()
-      let filename = case filename_raw {
+      // Process the arguments
+      let args = string.split(argv, " ")
+
+      // Get input filename
+      let filename = case list.first(args) {
         Ok(filename) -> filename
         Error(_) -> {
           io.println("Error: No filename provided, using README.md")
           "README.md"
         }
+      }
+
+      // Get output filename (if provided)
+      let output_filename = case args {
+        [_, output_name, ..] -> output_name
+        _ -> default_output_filename(filename)
       }
 
       // Extract title from filename
@@ -67,12 +75,6 @@ pub fn main() {
               title,
             )
 
-          // Output filename
-          let output_filename = case string.ends_with(filename, ".md") {
-            True -> string.replace(filename, ".md", ".html")
-            False -> filename <> ".html"
-          }
-
           // Write the HTML to a file
           case erl_wrapper.write_to_file(output_filename, html_document) {
             Ok(_) ->
@@ -87,6 +89,14 @@ pub fn main() {
         }
       }
     }
+  }
+}
+
+// Helper function to generate default output filename
+fn default_output_filename(filename: String) -> String {
+  case string.ends_with(filename, ".md") {
+    True -> string.replace(filename, ".md", ".html")
+    False -> filename <> ".html"
   }
 }
 
