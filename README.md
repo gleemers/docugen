@@ -4,11 +4,11 @@ Generate documentation based on a README.md file!
 
 ## Usage
 ```sh
-gleam run -- <md file>
+gleam run -- [md_file]
 ```
 
 ```sh
-docugen <md file>
+docugen [md_file]
 ```
 
 ## Development
