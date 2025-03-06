@@ -4,7 +4,6 @@ import gleam/list
 import gleam/result
 import gleam/string
 import html_converter
-import styles
 
 pub fn main() {
   // Get command line arguments
@@ -57,12 +56,20 @@ pub fn main() {
         }
         _ -> {
           // Convert each line to HTML
-          let html_lines =
+          let #(html_lines, _) =
             string.split(file_contents, "\n")
-            |> list.map(html_converter.convert_line)
+            |> list.fold(#([], html_converter.Normal), fn(acc, line) {
+              let #(lines, state) = acc
+              let #(converted, new_state) =
+                html_converter.convert_line(line, state)
+              #([converted, ..lines], new_state)
+            })
 
           // Join the HTML lines
-          let html_content = string.join(html_lines, "\n")
+          let html_content =
+            html_lines
+            |> list.reverse()
+            |> string.join("\n")
 
           // Process the HTML content to fix any issues
           let processed_html = process_html_content(html_content)
@@ -71,7 +78,7 @@ pub fn main() {
           let html_document =
             html_converter.html_template(
               processed_html,
-              styles.get_styles(),
+              erl_wrapper.readfile("priv/styles.css"),
               title,
             )
 

@@ -26,78 +26,112 @@ pub fn html_template(content: String, styles: String, title: String) -> String {
 </html>"
 }
 
-// Convert markdown line to HTML
-pub fn convert_line(line: String) -> String {
-  let trimmed = string.trim(line)
-
-  case trimmed {
-    // Headers
-    "###### " <> rest -> "<h6>" <> rest <> "</h6>"
-    "##### " <> rest -> "<h5>" <> rest <> "</h5>"
-    "#### " <> rest -> "<h4>" <> rest <> "</h4>"
-    "### " <> rest -> "<h3>" <> rest <> "</h3>"
-    "## " <> rest -> "<h2>" <> rest <> "</h2>"
-    "# " <> rest -> "<h1>" <> rest <> "</h1>"
-
-    // Lists
-    "* " <> rest -> "<ul><li>" <> rest <> "</li></ul>"
-    "- " <> rest -> "<ul><li>" <> rest <> "</li></ul>"
-    "1. " <> rest -> "<ol><li>" <> rest <> "</li></ol>"
-
-    // Code blocks - handle language specification
-    "```" -> "</div>"
-    "```" <> lang -> {
-      case string.trim(lang) {
-        "" -> "<div class=\"code-block\">"
-        "gleam" -> "<div class=\"code-block language-gleam\">"
-        "erl" | "erlang" -> "<div class=\"code-block language-erlang\">"
-        "ex" | "exs" | "elixir" -> "<div class=\"code-block language-elixir\">"
-        "js" | "javascript" -> "<div class=\"code-block language-javascript\">"
-        "ts" | "typescript" -> "<div class=\"code-block language-typescript\">"
-        "py" | "python" -> "<div class=\"code-block language-python\">"
-        "rb" | "ruby" -> "<div class=\"code-block language-ruby\">"
-        "go" -> "<div class=\"code-block language-go\">"
-        "rs" | "rust" -> "<div class=\"code-block language-rust\">"
-        "java" -> "<div class=\"code-block language-java\">"
-        "c" | "cpp" | "c++" -> "<div class=\"code-block language-cpp\">"
-        "cs" | "csharp" -> "<div class=\"code-block language-csharp\">"
-        "php" -> "<div class=\"code-block language-php\">"
-        "html" -> "<div class=\"code-block language-html\">"
-        "css" -> "<div class=\"code-block language-css\">"
-        "sh" | "bash" | "shell" -> "<div class=\"code-block language-bash\">"
-        language -> "<div class=\"code-block language-" <> language <> "\">"
-      }
-    }
-
-    // Horizontal rule
-    "---" -> "<hr>"
-    "***" -> "<hr>"
-
-    // Empty line
-    "" -> ""
-
-    // Default paragraph
-    _ -> {
-      // Check if this is a code line (indented with spaces or tabs)
-      case string.starts_with(line, "    ") || string.starts_with(line, "\t") {
-        True -> "<pre><code>" <> line <> "</code></pre>"
-        False -> "<p>" <> line <> "</p>"
-      }
-    }
-  }
+pub type State {
+  Normal
+  InCodeBlock
 }
 
-// Find the index of the style section
-fn find_style_section(
-  lines: List(String),
-  current_index: Int,
-) -> Result(Int, Nil) {
-  case lines {
-    [] -> Error(Nil)
-    [first, ..rest] -> {
-      case string.starts_with(first, "## Styles") {
-        True -> Ok(current_index)
-        False -> find_style_section(rest, current_index + 1)
+pub fn convert_line(line: String, state: State) -> #(String, State) {
+  case state {
+    InCodeBlock -> {
+      case string.trim(line) {
+        "```" -> #("</div>", Normal)
+        _ -> #(line, InCodeBlock)
+      }
+    }
+    Normal -> {
+      case string.trim(line) {
+        // Headers
+        "###### " <> rest -> #("<h6>" <> rest <> "</h6>", Normal)
+        "##### " <> rest -> #("<h5>" <> rest <> "</h5>", Normal)
+        "#### " <> rest -> #("<h4>" <> rest <> "</h4>", Normal)
+        "### " <> rest -> #("<h3>" <> rest <> "</h3>", Normal)
+        "## " <> rest -> #("<h2>" <> rest <> "</h2>", Normal)
+        "# " <> rest -> #("<h1>" <> rest <> "</h1>", Normal)
+
+        // Lists
+        "* " <> rest -> #("<ul><li>" <> rest <> "</li></ul>", Normal)
+        "- " <> rest -> #("<ul><li>" <> rest <> "</li></ul>", Normal)
+        "1. " <> rest -> #("<ol><li>" <> rest <> "</li></ol>", Normal)
+
+        // Code blocks - handle language specification
+        "```" -> #("<div class=\"code-block\">", InCodeBlock)
+        "```" <> lang -> {
+          case string.trim(lang) {
+            "" -> #("<div class=\"code-block\">", InCodeBlock)
+            "gleam" -> #(
+              "<div class=\"code-block language-gleam\">",
+              InCodeBlock,
+            )
+            "erl" | "erlang" -> #(
+              "<div class=\"code-block language-erlang\">",
+              InCodeBlock,
+            )
+            "ex" | "exs" | "elixir" -> #(
+              "<div class=\"code-block language-elixir\">",
+              InCodeBlock,
+            )
+            "js" | "javascript" -> #(
+              "<div class=\"code-block language-javascript\">",
+              InCodeBlock,
+            )
+            "ts" | "typescript" -> #(
+              "<div class=\"code-block language-typescript\">",
+              InCodeBlock,
+            )
+            "py" | "python" -> #(
+              "<div class=\"code-block language-python\">",
+              InCodeBlock,
+            )
+            "rb" | "ruby" -> #(
+              "<div class=\"code-block language-ruby\">",
+              InCodeBlock,
+            )
+            "go" -> #("<div class=\"code-block language-go\">", InCodeBlock)
+            "rs" | "rust" -> #(
+              "<div class=\"code-block language-rust\">",
+              InCodeBlock,
+            )
+            "java" -> #("<div class=\"code-block language-java\">", InCodeBlock)
+            "c" | "cpp" | "c++" -> #(
+              "<div class=\"code-block language-cpp\">",
+              InCodeBlock,
+            )
+            "cs" | "csharp" -> #(
+              "<div class=\"code-block language-csharp\">",
+              InCodeBlock,
+            )
+            "php" -> #("<div class=\"code-block language-php\">", InCodeBlock)
+            "html" -> #("<div class=\"code-block language-html\">", InCodeBlock)
+            "css" -> #("<div class=\"code-block language-css\">", InCodeBlock)
+            "sh" | "bash" | "shell" -> #(
+              "<div class=\"code-block language-bash\">",
+              InCodeBlock,
+            )
+            language -> #(
+              "<div class=\"code-block language-" <> language <> "\">",
+              InCodeBlock,
+            )
+          }
+        }
+
+        // Horizontal rule
+        "---" -> #("<hr>", Normal)
+        "***" -> #("<hr>", Normal)
+
+        // Empty line
+        "" -> #("", Normal)
+
+        // Default paragraph
+        _ -> {
+          // Check if this is a code line (indented with spaces or tabs)
+          case
+            string.starts_with(line, "    ") || string.starts_with(line, "\t")
+          {
+            True -> #("<pre><code>" <> line <> "</code></pre>", Normal)
+            False -> #("<p>" <> line <> "</p>", Normal)
+          }
+        }
       }
     }
   }

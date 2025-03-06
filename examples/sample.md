@@ -22,7 +22,7 @@ pub fn main() {
 ```erlang
 -module(example)
 
--hello() ->
+hello() ->
   io:format("Hello, World!~n").
 ```
 
