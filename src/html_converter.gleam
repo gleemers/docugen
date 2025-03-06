@@ -1,5 +1,10 @@
 import gleam/string
 
+pub type State {
+  Normal
+  InCodeBlock
+}
+
 // Define HTML template with title
 pub fn html_template(content: String, styles: String, title: String) -> String {
   "<!DOCTYPE html>
@@ -26,21 +31,24 @@ pub fn html_template(content: String, styles: String, title: String) -> String {
 </html>"
 }
 
-pub type State {
-  Normal
-  InCodeBlock
-}
-
 pub fn convert_line(line: String, state: State) -> #(String, State) {
+  let processed_line = {
+    line
+    |> string.replace("<", "&lt;")
+    |> string.replace(">", "&gt;")
+  }
+
+  let trimmed = processed_line |> string.trim()
+
   case state {
     InCodeBlock -> {
-      case string.trim(line) {
+      case trimmed {
         "```" -> #("</div>", Normal)
-        _ -> #(line, InCodeBlock)
+        _ -> #(trimmed, InCodeBlock)
       }
     }
     Normal -> {
-      case string.trim(line) {
+      case trimmed {
         // Headers
         "###### " <> rest -> #("<h6>" <> rest <> "</h6>", Normal)
         "##### " <> rest -> #("<h5>" <> rest <> "</h5>", Normal)
@@ -128,8 +136,11 @@ pub fn convert_line(line: String, state: State) -> #(String, State) {
           case
             string.starts_with(line, "    ") || string.starts_with(line, "\t")
           {
-            True -> #("<pre><code>" <> line <> "</code></pre>", Normal)
-            False -> #("<p>" <> line <> "</p>", Normal)
+            True -> #(
+              "<pre><code>" <> processed_line <> "</code></pre>",
+              Normal,
+            )
+            False -> #("<p>" <> processed_line <> "</p>", Normal)
           }
         }
       }
