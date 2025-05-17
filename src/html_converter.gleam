@@ -5,7 +5,7 @@ pub type State {
   InCodeBlock
 }
 
-// Define HTML template with title
+/// Construct HTML template
 pub fn html_template(content: String, styles: String, title: String) -> String {
   "<!DOCTYPE html>
 <html lang=\"en\">
@@ -49,7 +49,6 @@ pub fn convert_line(line: String, state: State) -> #(String, State) {
     }
     Normal -> {
       case trimmed {
-        // Headers
         "###### " <> rest -> #("<h6>" <> rest <> "</h6>", Normal)
         "##### " <> rest -> #("<h5>" <> rest <> "</h5>", Normal)
         "#### " <> rest -> #("<h4>" <> rest <> "</h4>", Normal)
@@ -57,12 +56,10 @@ pub fn convert_line(line: String, state: State) -> #(String, State) {
         "## " <> rest -> #("<h2>" <> rest <> "</h2>", Normal)
         "# " <> rest -> #("<h1>" <> rest <> "</h1>", Normal)
 
-        // Lists
         "* " <> rest -> #("<ul><li>" <> rest <> "</li></ul>", Normal)
         "- " <> rest -> #("<ul><li>" <> rest <> "</li></ul>", Normal)
         "1. " <> rest -> #("<ol><li>" <> rest <> "</li></ol>", Normal)
 
-        // Code blocks - handle language specification
         "```" -> #("<div class=\"code-block\">", InCodeBlock)
         "```" <> lang -> {
           case string.trim(lang) {
@@ -123,16 +120,12 @@ pub fn convert_line(line: String, state: State) -> #(String, State) {
           }
         }
 
-        // Horizontal rule
         "---" -> #("<hr>", Normal)
         "***" -> #("<hr>", Normal)
 
-        // Empty line
         "" -> #("", Normal)
 
-        // Default paragraph
         _ -> {
-          // Check if this is a code line (indented with spaces or tabs)
           case
             string.starts_with(line, "    ") || string.starts_with(line, "\t")
           {
@@ -147,3 +140,4 @@ pub fn convert_line(line: String, state: State) -> #(String, State) {
     }
   }
 }
+

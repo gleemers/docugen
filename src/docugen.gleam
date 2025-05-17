@@ -6,20 +6,16 @@ import gleam/string
 import html_converter
 
 pub fn main() {
-  // Get command line arguments
   let argv = erl_wrapper.get_argv()
 
-  // Check if argv is empty
   case argv {
     "" -> {
-      // The Erlang wrapper already printed usage and will exit
+      // wrapper prints usage if no argv
       Nil
     }
     _ -> {
-      // Process the arguments
       let args = string.split(argv, " ")
 
-      // Get input filename
       let filename = case list.first(args) {
         Ok(filename) -> filename
         Error(_) -> {
@@ -28,34 +24,28 @@ pub fn main() {
         }
       }
 
-      // Get output filename (if provided)
       let output_filename = case args {
         [_, output_name, ..] -> output_name
         _ -> default_output_filename(filename)
       }
 
-      // Extract title from filename
       let title = extract_title(filename)
-
-      // Read the file contents
       let file_contents = erl_wrapper.readfile(filename)
 
-      // Check for special error messages
       case file_contents {
-        "FILE_EMPTY" -> {
+        "___DOCUGEN__::FILE_EMPTY" -> {
           io.println("Error: File '" <> filename <> "' is empty")
           Nil
         }
-        "FILE_NOT_FOUND" -> {
+        "___DOCUGEN__::FILE_NOT_FOUND" -> {
           io.println("Error: File '" <> filename <> "' does not exist")
           Nil
         }
-        "FILE_ERROR" -> {
+        "___DOCUGEN__::FILE_ERROR" -> {
           io.println("Error: Could not read file '" <> filename <> "'")
           Nil
         }
         _ -> {
-          // Convert each line to HTML
           let #(html_lines, _) =
             string.split(file_contents, "\n")
             |> list.fold(#([], html_converter.Normal), fn(acc, line) {
@@ -65,16 +55,12 @@ pub fn main() {
               #([converted, ..lines], new_state)
             })
 
-          // Join the HTML lines
           let html_content =
             html_lines
             |> list.reverse()
             |> string.join("\n")
 
-          // Process the HTML content to fix any issues
           let processed_html = process_html_content(html_content)
-
-          // Create the final HTML document
           let html_document =
             html_converter.html_template(
               processed_html,
@@ -82,7 +68,6 @@ pub fn main() {
               title,
             )
 
-          // Write the HTML to a file
           case erl_wrapper.write_to_file(output_filename, html_document) {
             Ok(_) ->
               io.println(
@@ -99,7 +84,6 @@ pub fn main() {
   }
 }
 
-// Helper function to generate default output filename
 fn default_output_filename(filename: String) -> String {
   case string.ends_with(filename, ".md") {
     True -> string.replace(filename, ".md", ".html")
@@ -107,9 +91,7 @@ fn default_output_filename(filename: String) -> String {
   }
 }
 
-// Extract a title from the filename
 fn extract_title(filename: String) -> String {
-  // Extract just the filename without the path
   let filename = case string.contains(filename, "/") {
     True -> {
       let parts = string.split(filename, "/")
@@ -118,7 +100,6 @@ fn extract_title(filename: String) -> String {
     False -> filename
   }
 
-  // Remove file extension if present
   let base_name = case string.contains(filename, ".") {
     True -> {
       let parts = string.split(filename, ".")
@@ -127,17 +108,13 @@ fn extract_title(filename: String) -> String {
     False -> filename
   }
 
-  // Replace underscores and hyphens with spaces
   let title = string.replace(base_name, "_", " ")
   let title = string.replace(title, "-", " ")
 
-  // Capitalize the title
   string.capitalise(title)
 }
 
-// Process HTML content to fix any issues
 fn process_html_content(content: String) -> String {
-  // Ensure all code blocks are properly closed
   let content = case
     string.contains(content, "<div class=\"code-block\">")
     && !string.contains(content, "</div>")
@@ -146,10 +123,7 @@ fn process_html_content(content: String) -> String {
     False -> content
   }
 
-  // Remove consecutive empty paragraphs
   let content = string.replace(content, "<p></p>\n<p></p>", "<p></p>")
-
-  // Fix list items
   let content = string.replace(content, "</ul>\n<ul>", "")
   let content = string.replace(content, "</ol>\n<ol>", "")
 
