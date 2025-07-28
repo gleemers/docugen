@@ -1,7 +1,7 @@
 name = "docugen"
 version = "1.0.0"
 target = "erlang"
-license = "MIT"
+licenses = ["MIT"]
 description = "A tool for generating HTML documentation from Markdown files."
 
 [dependencies]

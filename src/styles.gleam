@@ -205,4 +205,3 @@ pub fn get_styles() -> String {
       margin: 0.5em 0;
     }"
 }
-

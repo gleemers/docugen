@@ -11,4 +11,3 @@ pub fn get_argv() -> String
 /// ERL: Write to file
 @external(erlang, "docugen_erlang", "write_file")
 pub fn write_to_file(filename: String, content: String) -> Result(Nil, String)
-

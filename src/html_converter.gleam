@@ -12,6 +12,7 @@ pub fn html_template(content: String, styles: String, title: String) -> String {
 <head>
   <meta charset=\"UTF-8\">
   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+  <meta name=\"darkreader-lock\">
   <title>" <> title <> "</title>
   <style>
 " <> styles <> "
@@ -140,4 +141,3 @@ pub fn convert_line(line: String, state: State) -> #(String, State) {
     }
   }
 }
-
